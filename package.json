@@ -1,0 +1,33 @@
+{
+    "name": "serverless-oncall",
+    "displayName": "serverless-oncall",
+    "description": "Easily manage oncall for your serverless services",
+    "version": "0.0.1",
+    "categories": [
+        "Other"
+    ],
+    "main": "dist/index.js",
+    "files": [
+        "dist",
+        "package.json",
+        "README.md"
+    ],
+    "scripts": {
+        "compile": "tsc -p ./",
+        "watch": "tsc -watch -p ./",
+        "pretest": "npm run lint",
+        "test": "jest",
+        "lint": "tslint -c tslint.json 'src/**/*.ts'"
+    },
+    "devDependencies": {
+        "@types/fs-extra": "5.0.0",
+        "typescript": "^2.6.1",
+        "vscode": "^1.1.21",
+        "tslint": "^5.8.0",
+        "@types/node": "^8.10.25",
+        "@types/mocha": "^2.2.42"
+    },
+    "dependencies": {
+        "fs-extra": "^5.0.0"
+    }
+}
