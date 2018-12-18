@@ -1,3 +1,17 @@
+
+export interface CommandOption {
+  usage: string;
+  shortcut: string;
+  required?: true | false;
+}
+
+export interface CommandDescription {
+  usage: string;
+  lifecycleEvents: string[];
+  commands?: { [key: string]: CommandDescription };
+  options?: { [key: string]: CommandOption };
+}
+
 export interface ServerlessInstance {
   cli: {
     log(str: string): any

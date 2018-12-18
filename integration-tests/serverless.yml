@@ -1,0 +1,5 @@
+service: test-svc
+provider:
+  name: aws
+plugins:
+ - serverless-oncall
