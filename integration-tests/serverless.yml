@@ -1,5 +1,14 @@
 service: test-svc
 provider:
   name: aws
+
+custom:
+  oncall:
+    # the escalation_policy you want pager duty alerts associated with
+    escalation_policy: ${env:PD_ESC_POLICY,''}
+    # credential used to authenticate with pagerduty api
+    # visit https://{company}.pagerduty.com/api_keys to create one
+    pd_api_key: ${env:PD_API_KEY,''}
+
 plugins:
  - serverless-oncall

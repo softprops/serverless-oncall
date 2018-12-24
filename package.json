@@ -1,5 +1,10 @@
 {
     "name": "serverless-oncall",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/softprops/serverless-oncall.git"
+    },
+    "license": "MIT",
     "displayName": "serverless-oncall",
     "description": "Easily manage oncall for your serverless services",
     "version": "0.0.1",
@@ -16,18 +21,48 @@
         "compile": "tsc -p ./",
         "watch": "tsc -watch -p ./",
         "pretest": "npm run lint",
-        "test": "jest",
+        "test": "nyc mocha --require ts-node/register --require source-map-support/register --recursivetests/**/*.ts",
         "lint": "tslint -c tslint.json 'src/**/*.ts'"
     },
+    "nyc": {
+        "include": [
+            "src/**/*.ts",
+            "src/**/*.tsx"
+        ],
+        "extension": [
+            ".ts",
+            ".tsx"
+        ],
+        "exclude": [
+            "**/*.d.ts"
+          ],
+        "require": [
+            "ts-node/register"
+        ],
+        "reporter": [
+            "text-summary",
+            "html"
+        ],
+        "sourceMap": true,
+        "instrument": true
+    },
     "devDependencies": {
+        "@types/chai": "^4.1.7",
         "@types/fs-extra": "5.0.0",
-        "@types/mocha": "^2.2.42",
+        "@types/mocha": "^2.2.48",
         "@types/node": "^8.10.25",
-        "serverless": "^1.35.0",
+        "chai": "^4.2.0",
+        "mocha": "^5.2.0",
+        "nyc": "^13.1.0",
+        "serverless": "^1.35.1",
+        "source-map-support": "^0.5.9",
+        "ts-node": "^7.0.1",
         "tslint": "^5.8.0",
         "typescript": "^2.6.1"
     },
     "dependencies": {
-        "fs-extra": "^5.0.0"
+        "fs-extra": "^5.0.0",
+        "node-pagerduty": "^1.1.0",
+        "request": "^2.88.0"
     }
 }

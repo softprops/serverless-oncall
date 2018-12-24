@@ -1,42 +1,214 @@
-import { CommandDescription, ServerlessInstance, ServerlessOptions } from './types';
+import { EscalationPolicy, Services, PagerDutyClient, Service } from './@types/pagerduty';
+import { CommandDescription, ServerlessInstance, ServerlessOptions } from './@types/serverless';
+import * as PagerDuty from 'node-pagerduty';
 
 export class Oncall {
 
-  readonly serverless: ServerlessInstance;
-  readonly options: ServerlessOptions;
-  readonly commands: { [key: string]: CommandDescription };
-  readonly hooks: { [key: string]: any };
+    readonly serverless: ServerlessInstance;
+    readonly options: ServerlessOptions;
+    readonly commands: { [key: string]: CommandDescription };
+    readonly hooks: { [key: string]: any };
 
-  constructor(serverless: ServerlessInstance, options: ServerlessOptions) {
-    this.serverless = serverless;
-    this.options = options;
-    this.commands = {
-      oncall: {
-        usage: "Manages service oncall resources and incident management",
-        lifecycleEvents: ["sync"],
-        commands: {
-          sync: {
-            usage: "Sync's serverless.yml oncall resource information with a remote provider",
-            lifecycleEvents: ["init", "end"]
-          }
+    constructor(serverless: ServerlessInstance, options: ServerlessOptions) {
+        this.serverless = serverless;
+        this.options = options;
+        this.commands = {
+            oncall: {
+                usage: "Manages service oncall resources and incident management",
+                commands: {
+                    sync: {
+                        usage: "Sync's serverless.yml oncall resource information with a remote provider",
+                        lifecycleEvents: ["init", "end"]
+                    },
+                    escalationPolcies: {
+                        usage: "List available ecalation policies provided by a remote provider",
+                        lifecycleEvents: ["init", "end"],
+                        options: {
+                            team: {
+                                usage: 'limit policies to those of a given team',
+                                shortcut: 't'
+                            }
+                        }
+                    }
+                }
+            }
+        };
+        this.hooks = {
+            'oncall:sync:init': this.sync.bind(this),
+            'oncall:sync': this.sync.bind(this),
+            //'oncall:sync:end': this.end.bind(this),
+            'oncall:escalationPolcies:init': this.escalationPolicies.bind(this),
+            //'oncall:escalationPolcies': this.escalationPolicies.bind(this),
+            //'oncall:escalationPolcies:end': this.end.bind(this),
+            'before:info:info': this.displayOncall.bind(this)
+        };
+    }
+
+    async findOncallSevice(client: PagerDutyClient, serviceName: string): Promise<Service | undefined> {
+        const args: { [key: string]: string } = { query: serviceName, 'include[]': 'integrations' };
+        // this list should be sufficiently filtered that pagination is not needed
+        let res = await client.services.listServices(args);
+        const s: Services = JSON.parse(res.body);
+        return s.services.find(s => s.name === serviceName);
+    }
+
+    async createOncallService(client: PagerDutyClient, serviceName: string, escalationPolicy: string): Promise<Service | undefined> {
+        return client.services.createService({
+            service: {
+                type: "service",
+                name: serviceName,
+                description: "Managed by serverless oncall",
+                escalation_policy: {
+                    id: escalationPolicy,
+                    type: 'escalation_policy_reference'
+                },
+                alert_creation: 'create_alerts_and_incidents'
+            }
+        }).then(res => {
+            const service: Service = JSON.parse(res.body);
+            return service;
+        });
+    }
+
+    // helper method to create a new custom event transform integration from the pagerduty api
+    async createIntegration(client: PagerDutyClient, serviceName: string, serviceId: string): Promise<any> {
+        // https://www.pagerduty.com/blog/new-api-endpoints-increase-platform-extensibility/
+        // docs https://v2.developer.pagerduty.com/v2/page/api-reference#!/Services/post_services_id_integrations
+        // see https://v2.developer.pagerduty.com/v2/docs/creating-an-integration-inline for code api
+        // see https://gist.github.com/richadams/3f51b617dc4051563fe358d7b0d40fe2 for a code example
+        return client.services.createIntegration(serviceId, {
+            integration: {
+                config: {
+                    fields: {
+                        code: {
+                            type: 'code',
+                            value: "PD.emitGenericEvents([])// test"
+                        }
+                    }
+                },
+                name: `${serviceName} Event Transformer`,
+                summary: `Event Transformer for ${serviceName} events generated by serverless-oncall`,
+                type: "event_transformer_api_inbound_integration",
+                vendor: {
+                    id: "PCJ0EFQ",
+                    type: "vendor_reference"
+                }
+            }
+        });
+    }
+
+    // helper method to fetch escalation policies from the pager duty api
+    async listEscalationPolcies(client: PagerDutyClient, options: any): Promise<EscalationPolicy[]> {
+        const args: { [key: string]: string } = { 'include[]': 'teams' };
+        if (options.team !== undefined) {
+            args['team_ids[]'] = options.team;
         }
-      }
-    };
-    this.hooks = {
-      'oncall:sync:init': this.sync.bind(this),
-      'oncall:sync': this.sync.bind(this),
-      'oncall:sync:end': this.end.bind(this),
-    };
-  }
+        if (options.offset !== undefined) {
+            args.offset = options.offset;
+        }
+        return client.escalationPolicies.listEscalationPolicies(args).then(res => {
+            // todo handle error response
+            const response: { escalation_policies: EscalationPolicy[], limit: number, offset: number, more: boolean } = JSON.parse(res.body);
+            if (response.more) {
+                return this.listEscalationPolcies(
+                    client,
+                    Object.assign(
+                        options,
+                        {
+                            offset: response.offset + response.limit
+                        }
+                    )
+                ).then(next =>
+                    response.escalation_policies.concat(next)
+                );
+            } else {
+                return response.escalation_policies;
+            }
+        });
+    }
 
-  sync() {
-    this.serverless.cli.log("sync...");
-  }
+    async escalationPolicies() {
+        const custom = this.serverless.service.custom || {};
+        const oncall = custom.oncall || {};
+        const apiKey = oncall.pd_api_key;
+        if (apiKey === undefined) {
+            throw new Error(
+                "The serverless-oncall plugin requires a custom oncall configuration block containing an `oncall.pd_api_key` identifier\n\n  You can obtain one by visiting https://{company}.pagerduty.com/api_keys or talk to your pagerduty admin"
+            );
+        }
+        this.serverless.cli.log(`resolving oncall escalationPolicies`);
+        return await this.listEscalationPolcies(new PagerDuty(apiKey), this.options).then(policies => {
+            policies.forEach(p => {
+                this.serverless.cli.log(`${p.summary} (${p.id})`);
+                if (p.teams) {
+                    this.serverless.cli.log(` * managed by ${p.teams.map(t => `${t.name} (${t.id})`)}`);
+                }
+            });
+        });
+    }
 
-  end() {
-    this.serverless.cli.log("end...");
-  }
+    async sync() {
+        const serviceName = `test ${this.serverless.service.service}`;
+        this.serverless.cli.log(`syncing oncall for service ${serviceName}...`);
+        const custom = this.serverless.service.custom || {};
+        const oncall = custom.oncall || {};
+        const apiKey = oncall.pd_api_key;
+        if (!apiKey) {
+            throw new Error(
+                "The serverless-oncall plugin requires a custom oncall configuration block containing an `oncall.pd_api_key` identifier\n\n  You can obtain one by visiting https://{company}.pagerduty.com/api_keys or talk to your pagerduty admin"
+            );
+        }
+        const escalationPolicy = oncall.escalation_policy;
+        if (escalationPolicy === undefined) {
+            throw new Error(
+                'The serverless-oncall plugin requires a custom oncall configuration block containing an `oncall.escalation_policy` identifier'
+            );
+        }
+        const pd: PagerDutyClient = new PagerDuty(apiKey);
+        let pdService = await this.findOncallSevice(pd, serviceName);
+        if (pdService === undefined) {
+            this.serverless.cli.log(`creating pager duty service named ${serviceName}`);
+            pdService = await this.createOncallService(pd, serviceName, escalationPolicy);
+            if (pdService !== undefined) {
+                await this.createIntegration(pd, serviceName, pdService.id);
+                //console.log(integration);
+            }
+        } else {
+            if (pdService.integrations.length > 0) {
+                //console.log(pdService.integrations[0]);
+                //console.log(pdService.integrations[0].config);
+            } else {
+                await this.createIntegration(pd, serviceName, pdService.id);
+                //console.log(integration.body.integration.config);
+            }
+        }
+    }
 
+    end() {
+        this.serverless.cli.log("...end");
+    }
+
+    async displayOncall() {
+        const serviceName = `test ${this.serverless.service.service}`;
+        const custom = this.serverless.service.custom || {};
+        const oncall = custom.oncall || {};
+        const apiKey = oncall.pd_api_key;
+        if (!apiKey) {
+            throw new Error(
+                "The serverless-oncall plugin requires a custom oncall configuration block containing an `oncall.pd_api_key` identifier\n\n  You can obtain one by visiting https://{company}.pagerduty.com/api_keys or talk to your pagerduty admin"
+            );
+        }
+        const pd: PagerDutyClient = new PagerDuty(apiKey);
+        let pdService = await this.findOncallSevice(pd, serviceName);
+        if (pdService === undefined) {
+            return;
+        }
+        this.serverless.cli.log("Oncall");
+        this.serverless.cli.consoleLog(`    Service ${pdService.name}: ${pdService.html_url}`);
+        this.serverless.cli.consoleLog(`    Escalation policy ${pdService.escalation_policy.summary}: ${pdService.escalation_policy.html_url}`);
+        pdService.teams.forEach(team => this.serverless.cli.consoleLog(`    Managed by ${team.summary}: ${team.html_url}`));
+        //this.serverless.cli.consoleLog(pdService);
+    }
 
 }
 

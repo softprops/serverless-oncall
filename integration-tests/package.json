@@ -1,6 +1,5 @@
 {
   "devDependencies": {
-    "serverless": "^1.35.0",
-    "serverless-oncall": "file:.."
+    "serverless": "^1.35.1"
   }
 }
