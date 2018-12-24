@@ -212,4 +212,5 @@ export class Oncall {
 
 }
 
+// don't export default because https://basarat.gitbooks.io/typescript/docs/tips/defaultIsBad.html
 module.exports = Oncall;

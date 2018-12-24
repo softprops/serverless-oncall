@@ -7,7 +7,7 @@ describe('Oncall', () => {
             {
                 cli: {
                     log(args: any) { },
-                    consoleLog(args: any) {}
+                    consoleLog(args: any) { }
                 },
                 service: {
                     service: 'foobar',
@@ -21,6 +21,7 @@ describe('Oncall', () => {
             }
         );
         // https://www.chaijs.com/api/bdd/
-      expect(oncall.displayOncall()).to.throw();
+        expect(oncall.displayOncall()).to.throw();
+
     });
 });

@@ -21,7 +21,7 @@
         "compile": "tsc -p ./",
         "watch": "tsc -watch -p ./",
         "pretest": "npm run lint",
-        "test": "nyc mocha --require ts-node/register --require source-map-support/register --recursive tests/**/*.ts",
+        "test": "nyc mocha --require ts-node/register --require source-map-support/register --recursive tests/*.ts",
         "lint": "tslint -c tslint.json 'src/**/*.ts'"
     },
     "nyc": {
