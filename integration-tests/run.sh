@@ -1,8 +1,8 @@
 #!/bin/bash
 
 # install it (via local link)
-npm link ../.
 npm i
+npm link ../.
 
 # get help
 npx serverless oncall --help
