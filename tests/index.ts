@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import { Oncall } from '../src';
+import Oncall from '../src';
 
 describe('Oncall', () => {
     it('works', () => {
@@ -21,7 +21,7 @@ describe('Oncall', () => {
             }
         );
         // https://www.chaijs.com/api/bdd/
-        expect(oncall.displayOncall()).to.throw();
+        expect(oncall.displayOncall).to.throw();
 
     });
 });
