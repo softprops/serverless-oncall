@@ -2,6 +2,7 @@
     "compilerOptions": {
         "noImplicitAny": false, // hack! plz fix
         "module": "commonjs",
+        "declaration": true,
         "target": "es6",
         "outDir": "dist",
         "lib": [

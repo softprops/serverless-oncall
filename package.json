@@ -35,7 +35,7 @@
         ],
         "exclude": [
             "**/*.d.ts"
-          ],
+        ],
         "require": [
             "ts-node/register"
         ],
