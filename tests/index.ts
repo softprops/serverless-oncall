@@ -19,7 +19,7 @@ describe('Oncall', () => {
             noCustomField, {}
         );
         // https://www.chaijs.com/api/bdd/
-        expect(oncall.displayOncall).to.throw();
+        expect(function() { oncall.displayOncall(); }).to.throw();
 
 
     });
