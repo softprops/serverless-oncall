@@ -7,8 +7,9 @@ before(() => {
     chai.use(chaiAsPromised);
 });
 
+// https://www.chaijs.com/api/bdd/
 describe('Oncall', () => {
-    it('works', async () => {
+    it('requires a serverless.custom.oncall field', async () => {
         const noCustomField = {
             cli: {
                 log(args: any) { },
@@ -24,7 +25,29 @@ describe('Oncall', () => {
         const oncall = new Oncall(
             noCustomField, {}
         );
-        // https://www.chaijs.com/api/bdd/
+
+        return oncall.displayOncall().should.be.rejected;
+    });
+
+
+    it('requires a serverless.custom.oncall field', async () => {
+        const noCustomField = {
+            cli: {
+                log(args: any) { },
+                consoleLog(args: any) { }
+            },
+            service: {
+                service: 'foobar',
+                provider: {
+                    name: 'aws'
+                }
+            },
+            custom: { }
+        };
+        const oncall = new Oncall(
+            noCustomField, {}
+        );
+
         return oncall.displayOncall().should.be.rejected;
     });
 });

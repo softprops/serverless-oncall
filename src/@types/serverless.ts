@@ -27,11 +27,11 @@ export interface ServerlessInstance {
         custom?: {
             oncall?: {
                 /** required: pager duty (v2 api) credential */
-                pd_api_key?: string
+                apiKey?: string
                 /** required: pager duty escalation policy to associate oncall service with */
-                escalation_policy?: string
+                escalationPolicy?: string
                 /** optional an override of serverless.service name */
-                service_name?: string
+                serviceName?: string
             }
         }
     };

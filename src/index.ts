@@ -58,7 +58,7 @@ export class Oncall {
                 type: "service",
                 name: serviceName,
                 description: "Managed by serverless oncall",
-                escalation_policy: {
+                escalationPolicy: {
                     id: escalationPolicy,
                     type: 'escalation_policy_reference'
                 },
@@ -130,10 +130,10 @@ export class Oncall {
     async escalationPolicies() {
         const custom = this.serverless.service.custom || {};
         const oncall = custom.oncall || {};
-        const apiKey = oncall.pd_api_key;
+        const apiKey = oncall.apiKey;
         if (apiKey === undefined) {
             throw new Error(
-                "The serverless-oncall plugin requires a custom oncall configuration block containing an `oncall.pd_api_key` identifier\n\n  You can obtain one by visiting https://{company}.pagerduty.com/api_keys or talk to your pagerduty admin"
+                "The serverless-oncall plugin requires a custom oncall configuration block containing an `oncall.apiKey` identifier\n\n  You can obtain one by visiting https://{company}.pagerduty.com/api_keys or talk to your pagerduty admin"
             );
         }
         this.serverless.cli.log(`resolving oncall escalationPolicies`);
@@ -152,16 +152,16 @@ export class Oncall {
         this.serverless.cli.log(`syncing oncall for service ${serviceName}...`);
         const custom = this.serverless.service.custom || {};
         const oncall = custom.oncall || {};
-        const apiKey = oncall.pd_api_key;
+        const apiKey = oncall.apiKey;
         if (!apiKey) {
             throw new Error(
-                "The serverless-oncall plugin requires a custom oncall configuration block containing an `oncall.pd_api_key` identifier\n\n  You can obtain one by visiting https://{company}.pagerduty.com/api_keys or talk to your pagerduty admin"
+                "The serverless-oncall plugin requires a custom oncall configuration block containing an `oncall.apiKey` identifier\n\n  You can obtain one by visiting https://{company}.pagerduty.com/api_keys or talk to your pagerduty admin"
             );
         }
-        const escalationPolicy = oncall.escalation_policy;
+        const escalationPolicy = oncall.escalationPolicy;
         if (escalationPolicy === undefined) {
             throw new Error(
-                'The serverless-oncall plugin requires a custom oncall configuration block containing an `oncall.escalation_policy` identifier'
+                'The serverless-oncall plugin requires a custom oncall configuration block containing an `oncall.escalationPolicy` identifier'
             );
         }
         const pd: PagerDutyClient = new PagerDuty(apiKey);
@@ -192,10 +192,10 @@ export class Oncall {
         const serviceName = `test ${this.serverless.service.service}`;
         const custom = this.serverless.service.custom || {};
         const oncall = custom.oncall || {};
-        const apiKey = oncall.pd_api_key;
+        const apiKey = oncall.apiKey;
         if (!apiKey) {
             throw new Error(
-                "The serverless-oncall plugin requires a custom oncall configuration block containing an `oncall.pd_api_key` identifier\n\n  You can obtain one by visiting https://{company}.pagerduty.com/api_keys or talk to your pagerduty admin"
+                "The serverless-oncall plugin requires a custom oncall configuration block containing an `oncall.apiKey` identifier\n\n  You can obtain one by visiting https://{company}.pagerduty.com/api_keys or talk to your pagerduty admin"
             );
         }
         const pd: PagerDutyClient = new PagerDuty(apiKey);
