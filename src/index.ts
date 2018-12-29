@@ -212,5 +212,6 @@ export class Oncall {
 
 }
 
-//module.exports = Oncall;
-export default Oncall;
+module.exports = {
+    Oncall: Oncall
+};

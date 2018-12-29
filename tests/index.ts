@@ -1,6 +1,6 @@
 import * as chai from "chai";
 import * as chaiAsPromised from "chai-as-promised";
-import Oncall from '../src';
+import { Oncall } from '../src';
 
 before(() => {
     chai.should();
