@@ -10,7 +10,7 @@ customers tell you your service is down.
 The Serverless framework leverages multiple providers that manage many operational aspects of the _runtimes_
 your application runs on but they do not manage the operational aspects of _your application_ itself. That's up to you.
 
-A number of great monitoring solutions exist and there are event [serverless plugins](https://github.com/ACloudGuru/serverless-plugin-aws-alerts) to leverage them. Serverless oncall fills the gap
+A number of great monitoring solutions exist and there are even [serverless plugins](https://github.com/ACloudGuru/serverless-plugin-aws-alerts) to leverage them! Serverless oncall fills the gap
 of how you then **act** on these monitoring systems.
 
 Serverless oncall leverages [pagerduty](https://www.pagerduty.com/)*, a managed oncall scheduling, dispatch and notification hub, to map your application service to an oncall rotation that
