@@ -40,12 +40,12 @@ custom:
     # visit https://{company}.pagerduty.com/api_keys to create one
     apiKey: ${env:PD_API_KEY,''}
     # a list of integration types to associate with your oncall service
-    # this will determine how monitoring systems interact with your
-    # oncall service
+    # this will determine where monitoring systems send information to.
+    #
     # currently only the "cloudwatch" integration is support but more integrations are
     # planned for the future
     # you may omit this configuration if you wish and configure these manually
-    # in the pager duty web console
+    # in the pagerduty web console
     integrations:
       - cloudwatch
 ```
