@@ -36,9 +36,11 @@ custom:
   oncall:
     # the escalation_policy you want pager duty alerts associated with
     escalationPolicy: ${env:PD_ESC_POLICY,''}
+
     # credential used to authenticate with pagerduty api
     # visit https://{company}.pagerduty.com/api_keys to create one
     apiKey: ${env:PD_API_KEY,''}
+
     # a list of integration types to associate with your oncall service
     # this will determine where monitoring systems send information to.
     #
