@@ -9,6 +9,8 @@ custom:
     # credential used to authenticate with pagerduty api
     # visit https://{company}.pagerduty.com/api_keys to create one
     apiKey: ${env:PD_API_KEY,''}
+    integrations:
+      - cloudwatch
 
 plugins:
  - serverless-oncall

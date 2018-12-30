@@ -10,7 +10,7 @@ before(() => {
 
 // https://www.chaijs.com/api/bdd/
 describe('Oncall', () => {
-    it('requires a serverless.custom.oncall field', async () => {
+    it('requires a serverless.custom field', async () => {
         const noCustomField = {
             cli: {
                 log(args: any) { },
