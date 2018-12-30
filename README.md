@@ -18,12 +18,20 @@ intended to support its operations. The intended target for this support ideally
 
 This plugin is intended to pair well with the [AWS Alerts plugin](https://github.com/ACloudGuru/serverless-plugin-aws-alerts) but is not coupled to AWS serverless provider.
 
-## Usage
+## 📦 Install
 
-Oncall configuration is managed the same way you manage your application, though
-describing it in your application's `serverless.yml` file.
+Install the plugin with `npm`
+
+```bash
+$ npm i -D serverless-oncall
+```
+
+Update your `serverless.yml` file with the following
 
 ```yaml
+plugins:
+ - serverless-oncall
+
 custom:
   oncall:
     # the escalation_policy you want pager duty alerts associated with
@@ -53,9 +61,9 @@ externally.
 $ PD_ESC_POLICY=xxx PD_API_KEY=xxxxxxx npx serverless info
 ```
 
-### Commands
+## Commands
 
-#### escalationPolicies
+### escalationPolicies
 
 In order to create or update an oncall service you will need to first select an appropriate escalation policy to associate the service with. You can think of roughly as selecting the target group of individuals to be notified. This plugin provides the `escalationPolicies` command for conveniene of listing these but does not manage them directly. Use the pagerduty UI do that instead.
 
@@ -70,7 +78,7 @@ all teams. To limit this list to a single (your) team use the `-t` flag and prov
 $ npx serverless oncall escalationPolicies -t {team}
 ```
 
-#### sync
+### sync
 
 ```bash
 $ npx serverless oncall sync
