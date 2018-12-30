@@ -69,7 +69,7 @@ export = class Oncall {
         this.hooks = {
             'oncall:sync:sync': this.sync.bind(this),
             'oncall:escalationPolcies:escalationPolcies': this.escalationPolicies.bind(this),
-            'before:info:info': this.info.bind(this)
+            'after:info:info': this.info.bind(this)
         };
     }
 
