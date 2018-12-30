@@ -106,6 +106,7 @@ $ npx serverless info
 
 ## 🚧 Planned work
 
+* interface design. the current design relects an minimum viable design. this is subject to change.
 * support more integrations
 * support more oncall service providers
 
