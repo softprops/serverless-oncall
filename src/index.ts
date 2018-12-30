@@ -154,13 +154,26 @@ export = class Oncall {
         const apiKey = oncall.apiKey;
         if (!apiKey) {
             throw new Error(
-                "The serverless-oncall plugin requires a custom oncall configuration block containing an `oncall.apiKey` identifier\n\n  You can obtain one by visiting https://{company}.pagerduty.com/api_keys or talk to your pagerduty admin"
+                "The serverless-oncall plugin requires a custom oncall configuration block containing an `oncall.apiKey` identifier\n\n" +
+                '  ```\n' +
+                '  custom:\n'+
+                '      oncall:\n'+
+                '         apiKey: "apiKeyValue"\n'+
+                '         ^^^^^^\n'+
+                '  ```\n\n' +
+                "You can obtain one by visiting https://{company}.pagerduty.com/api_keys or talk to your pagerduty admin"
             );
         }
         const escalationPolicy = oncall.escalationPolicy;
         if (!escalationPolicy) {
             throw new Error(
-                'The serverless-oncall plugin requires a custom oncall configuration block containing an `oncall.escalationPolicy` identifier'
+                'The serverless-oncall plugin requires a custom oncall configuration block containing an `oncall.escalationPolicy` identifier\n\n' +
+                '  ```\n' +
+                '  custom:\n'+
+                '      oncall:\n'+
+                '         escalationPolicy: "policy_identifier"\n'+
+                '         ^^^^^^^^^^^^^^^^\n'+
+                '  ```'
             );
         }
         const pd: PagerDutyClient = new PagerDuty(apiKey);
