@@ -52,7 +52,7 @@ custom:
 
 This plugin currently requires a pagerduty api key to interact with the pagerduty api.
 
-💡 You can learn how to get your own [here](https://support.pagerduty.com/docs/using-the-api)
+💡 You can learn how to get your own api key [here](https://support.pagerduty.com/docs/using-the-api)
 
 It is recommended to
 **not** inline your api key's value directly in your `serverless.yaml` in plain text to avoid accidently checking it into source control.
