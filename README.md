@@ -14,7 +14,7 @@ A number of great monitoring solutions exist and there are even [serverless plug
 of how you then **act** on these monitoring systems.
 
 Serverless oncall leverages [pagerduty](https://www.pagerduty.com/)*, a managed oncall scheduling, dispatch and notification hub, to map your application service to an oncall rotation that
-intended to support its operations. The intended target for this support ideally is the developers that own the service.
+intended to support its operation. The intended target for this support ideally is the developers that own the service.
 
 This plugin is intended to pair well with the [AWS Alerts plugin](https://github.com/ACloudGuru/serverless-plugin-aws-alerts) but is not coupled to AWS serverless provider.
 
