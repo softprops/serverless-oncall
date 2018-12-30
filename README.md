@@ -65,7 +65,7 @@ externally.
 $ PD_ESC_POLICY=xxx PD_API_KEY=xxxxxxx npx serverless info
 ```
 
-Serverless framework provides many options for storing these externally from your source code. Pick one.
+Serverless framework provides [many options](https://serverless.com/framework/docs/providers/aws/guide/variables/) for storing these externally from your source code. Pick one.
 
 ## 🎙️ Commands
 
