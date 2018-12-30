@@ -58,7 +58,7 @@ export interface PagerDutyClient {
     services: {
         listServices(qs?: any): Promise<{ body: string }>
         createService(args: any): Promise<{ body: ServiceResponse }>
-        createIntegration(serviceId: string, payload: any): Promise<{ body: string }>
+        createIntegration(serviceId: string, payload: any): Promise<{ body: { integration: Integration } }>
     };
     /** https://v2.developer.pagerduty.com/v2/page/api-reference#!/Escalation_Policies */
     escalationPolicies: {

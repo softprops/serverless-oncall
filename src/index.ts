@@ -1,4 +1,4 @@
-import { EscalationPolicy, Services, PagerDutyClient, Service, IntegrationConfig } from './@types/pagerduty';
+import { EscalationPolicy, Services, PagerDutyClient, Service, IntegrationConfig, Integration } from './@types/pagerduty';
 import { Provider, CommandDescription, ServerlessInstance, ServerlessOptions } from './@types/serverless';
 import * as PagerDuty from 'node-pagerduty';
 
@@ -6,9 +6,9 @@ const API_KEY_MISSING: string =
   "The serverless-oncall plugin requires a custom oncall configuration block containing an `oncall.apiKey` identifier\n\n" +
   '  ```\n' +
   '  custom:\n'+
-  '      oncall:\n'+
-  '         apiKey: "your-api-key-here"\n'+
-  '         ^^^^^^\n'+
+  '    oncall:\n'+
+  '      apiKey: "your-api-key-here"\n'+
+  '      ^^^^^^\n'+
   '  ```\n\n' +
   "You can obtain one by visiting https://{your-company}.pagerduty.com/api_keys or talk to your friendly pagerduty admin";
 
@@ -16,9 +16,9 @@ const ESCALTION_POLICY_MISSING: string =
   'The serverless-oncall plugin requires a custom oncall configuration block containing an `oncall.escalationPolicy` identifier\n\n' +
   '  ```\n' +
   '  custom:\n'+
-  '      oncall:\n'+
-  '         escalationPolicy: "your-esclation-policy-identifier-here"\n'+
-  '         ^^^^^^^^^^^^^^^^\n'+
+  '    oncall:\n'+
+  '      escalationPolicy: "your-esclation-policy-identifier-here"\n'+
+  '      ^^^^^^^^^^^^^^^^\n'+
   '  ```\n';
 
 const INTEGRATIONS:  { [key: string]: IntegrationConfig }  = {
@@ -26,10 +26,11 @@ const INTEGRATIONS:  { [key: string]: IntegrationConfig }  = {
         vendor: "PZQ6AUS",
         type: "aws_cloudwatch_inbound_integration"
     },
+    /* https://github.com/softprops/serverless-oncall/issues/2
     'transform': {
         vendor: "PCJ0EFQ",
         type: "event_transformer_api_inbound_integration"
-    }
+    }*/
 };
 
 export = class Oncall {
@@ -68,7 +69,7 @@ export = class Oncall {
         this.hooks = {
             'oncall:sync:sync': this.sync.bind(this),
             'oncall:escalationPolcies:escalationPolcies': this.escalationPolicies.bind(this),
-            'after:info:info': this.info.bind(this)
+            'before:info:info': this.info.bind(this)
         };
     }
 
@@ -121,15 +122,15 @@ export = class Oncall {
     }
 
     // helper method to create am integration from the pagerduty api
-    async createIntegration(client: PagerDutyClient, serviceName: string, serviceId: string, integration: IntegrationConfig): Promise<any> {
-        this.serverless.cli.log('Creating oncall integration...');
+    async createIntegration(client: PagerDutyClient, serviceName: string, serviceId: string, integration: IntegrationConfig): Promise<Integration> {
         // https://www.pagerduty.com/blog/new-api-endpoints-increase-platform-extensibility/
         // docs https://v2.developer.pagerduty.com/v2/page/api-reference#!/Services/post_services_id_integrations
         // see https://v2.developer.pagerduty.com/v2/docs/creating-an-integration-inline for code api
         // see https://gist.github.com/richadams/3f51b617dc4051563fe358d7b0d40fe2 for a code example
-        return client.services.createIntegration(serviceId, this.integrationPayload(
+        let response = await client.services.createIntegration(serviceId, this.integrationPayload(
             serviceName, integration
         ));
+        return response.body.integration;
     }
 
     // helper method to fetch escalation policies from the pager duty api
@@ -180,7 +181,6 @@ export = class Oncall {
         });
     }
 
-
     config() {
         const custom = this.serverless.service.custom || {};
         return custom.oncall || {};
@@ -205,29 +205,52 @@ export = class Oncall {
             this.serverless.cli.log(`Creating oncall service named ${serviceName}`);
             service = await this.createService(pd, serviceName, escalationPolicy);
             if (service !== undefined) {
-                await this.createIntegration(pd, serviceName, service.id, INTEGRATIONS['cloudwatch']);
-                //console.log(integration);
+                for (let name of (config.integrations || [])) {
+                    let integration = INTEGRATIONS[name];
+                    if (integration) {
+                        this.serverless.cli.log(`Creating ${name} oncall integration...`);
+                        let newIntegration = await this.createIntegration(pd, serviceName, service.id, integration);
+                        if (newIntegration) {
+                            this.logIntegration(newIntegration);
+                        }
+                    } else {
+                        this.serverless.cli.log(`Skipping unsupported oncall integration ${name}`);
+                    }
+                }
+            } else {
+                this.serverless.cli.log(`Failed to create oncall service`);
             }
         } else {
             this.serverless.cli.log(`Oncall service exists`);
             if (service.integrations.length > 0) {
-                //console.log(pdService.integrations[0]);
-                //console.log(pdService.integrations[0].config);
+                // todo: was this user created?
             } else {
-                await this.createIntegration(pd, serviceName, service.id, INTEGRATIONS['cloudwatch']);
-                //console.log(integration.body.integration.config);
+                for (let name of (config.integrations || [])) {
+                    let integration = INTEGRATIONS[name];
+                    if (integration) {
+                        this.serverless.cli.log(`Creating ${name} oncall integration...`);
+                        let newIntegration = await this.createIntegration(pd, serviceName, service.id, integration);
+                        if (newIntegration) {
+                            this.logIntegration(newIntegration);
+                        }
+                    } else {
+                        this.serverless.cli.log(`Skipping unsupported oncall integration ${name}`);
+                    }
+                }
             }
         }
+    }
+
+    logIntegration(integration: Integration) {
+        this.serverless.cli.consoleLog(`      * ${integration.vendor.summary}: ${integration.html_url}`);
+        this.serverless.cli.consoleLog(`         Integration URL: https://events.pagerduty.com/integration/${integration.integration_key}/enqueue`);
     }
 
     logService(service: Service) {
         this.serverless.cli.consoleLog(`    Service ${service.name}: ${service.html_url}`);
         this.serverless.cli.consoleLog(`    Integrations`);
         if (service.integrations.length > 0) {
-            service.integrations.forEach(integration => {
-                this.serverless.cli.consoleLog(`      * ${integration.vendor.summary}: ${integration.html_url}`);
-                this.serverless.cli.consoleLog(`         Integration URL: https://events.pagerduty.com/integration/${integration.integration_key}/enqueue`);
-            });
+            service.integrations.forEach(integration => this.logIntegration(integration));
         } else {
             this.serverless.cli.consoleLog(`    None`);
         }

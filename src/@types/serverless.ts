@@ -30,6 +30,8 @@ export interface ServerlessInstance {
                 apiKey?: string
                 /** required: pager duty escalation policy to associate oncall service with */
                 escalationPolicy?: string
+                /** optional: list of integration identifiers */
+                integrations?: string[]
             }
         }
     };
