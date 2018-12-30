@@ -100,6 +100,12 @@ export = class Oncall {
     }
 
     integrationPayload(serviceName: string, integration: IntegrationConfig): object {
+        // todo: figure out how to provide a config object so we can support custom event transforms,
+        // a much more flexible integration.
+        // https://www.pagerduty.com/blog/new-api-endpoints-increase-platform-extensibility/
+        // docs https://v2.developer.pagerduty.com/v2/page/api-reference#!/Services/post_services_id_integrations
+        // see https://v2.developer.pagerduty.com/v2/docs/creating-an-integration-inline for code api
+        // see https://gist.github.com/richadams/3f51b617dc4051563fe358d7b0d40fe2 for a code example
         return {
             integration: {
                 /*config: {
@@ -123,10 +129,6 @@ export = class Oncall {
 
     // helper method to create am integration from the pagerduty api
     async createIntegration(client: PagerDutyClient, serviceName: string, serviceId: string, integration: IntegrationConfig): Promise<Integration> {
-        // https://www.pagerduty.com/blog/new-api-endpoints-increase-platform-extensibility/
-        // docs https://v2.developer.pagerduty.com/v2/page/api-reference#!/Services/post_services_id_integrations
-        // see https://v2.developer.pagerduty.com/v2/docs/creating-an-integration-inline for code api
-        // see https://gist.github.com/richadams/3f51b617dc4051563fe358d7b0d40fe2 for a code example
         let response = await client.services.createIntegration(serviceId, this.integrationPayload(
             serviceName, integration
         ));
