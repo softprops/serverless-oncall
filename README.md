@@ -100,6 +100,11 @@ $ npx serverless info
 
 \* serverless-oncall may support other oncall providers in the future
 
+## 🚧 Planned work
+
+* support more integrations
+* support more oncall service providers
+
 ## 👯 Contributing
 
 Contributions are welcome. Please read [our contributing doc](CONTRIBUTING.md) for more information.
