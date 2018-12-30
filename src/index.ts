@@ -120,7 +120,7 @@ export = class Oncall {
         };
     }
 
-    // helper method to create a new custom event transform integration from the pagerduty api
+    // helper method to create am integration from the pagerduty api
     async createIntegration(client: PagerDutyClient, serviceName: string, serviceId: string, integration: IntegrationConfig): Promise<any> {
         this.serverless.cli.log('Creating oncall integration...');
         // https://www.pagerduty.com/blog/new-api-endpoints-increase-platform-extensibility/
