@@ -53,7 +53,7 @@ describe('Oncall', () => {
             getProvider(name: string) {
                 return {
                     getStage() {
-                        return "test"
+                        return "test";
                     }
                 }
             }
