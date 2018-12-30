@@ -61,7 +61,7 @@ externally.
 $ PD_ESC_POLICY=xxx PD_API_KEY=xxxxxxx npx serverless info
 ```
 
-## Commands
+## 🎙️ Commands
 
 ### escalationPolicies
 
