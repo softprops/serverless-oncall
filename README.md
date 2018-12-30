@@ -74,7 +74,7 @@ Serverless framework provides [many options](https://serverless.com/framework/do
 serverless-oncall adds new commands to your servleress vocabulary. You can discover this new commands though the built-in `--help` option
 
 ```bash
-$ npx serverless help | grep oncall
+$ npx serverless --help | grep oncall
 ```
 
 ### escalationPolicies
