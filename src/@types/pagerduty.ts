@@ -9,6 +9,10 @@ export interface Services {
     more: true | false;
 }
 
+export interface ServiceResponse {
+    service: Service;
+}
+
 export interface Service {
     id: string;
     name: string;
@@ -49,7 +53,7 @@ export interface PagerDutyClient {
     /** https://v2.developer.pagerduty.com/v2/page/api-reference#!/Services  */
     services: {
         listServices(qs?: any): Promise<{ body: string }>
-        createService(args: any): Promise<{ body: string }>
+        createService(args: any): Promise<{ body: ServiceResponse }>
         createIntegration(serviceId: string, payload: any): Promise<{ body: string }>
     };
     /** https://v2.developer.pagerduty.com/v2/page/api-reference#!/Escalation_Policies */

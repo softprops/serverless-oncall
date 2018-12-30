@@ -64,11 +64,7 @@ export = class Oncall {
             }
         };
         return client.services.createService(payload).then(res => {
-            console.log("begin body");
-            console.log(res.body);
-            const service: Service = JSON.parse(res.body);
-            console.log("end body");
-            return service;
+            return res.body.service;
         });
     }
 
