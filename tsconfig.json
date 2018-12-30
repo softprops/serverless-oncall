@@ -3,13 +3,14 @@
         "noImplicitAny": false, // hack! plz fix
         "module": "commonjs",
         "declaration": true,
-        "target": "es6",
+        "target": "es5",
         "outDir": "dist",
         "lib": [
             "es6"
         ],
         "sourceMap": true,
         "rootDir": "./src",
+        "moduleResolution": "node",
         /* Strict Type-Checking Option */
         "strict": true,   /* enable all strict type-checking options */
         /* Additional Checks */

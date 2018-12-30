@@ -1,6 +1,7 @@
 import * as chai from "chai";
 import * as chaiAsPromised from "chai-as-promised";
-import { Oncall } from '../src';
+import Oncall = require("../src")
+
 
 before(() => {
     chai.should();
@@ -20,15 +21,21 @@ describe('Oncall', () => {
                 provider: {
                     name: 'aws'
                 }
+            },
+            getProvider(name: string) {
+                return {
+                    getStage() {
+                        return "test"
+                    }
+                }
             }
         };
         const oncall = new Oncall(
             noCustomField, {}
         );
 
-        return oncall.displayOncall().should.be.rejected;
+        return oncall.info().should.be.rejected;
     });
-
 
     it('requires a serverless.custom.oncall field', async () => {
         const noCustomField = {
@@ -42,12 +49,19 @@ describe('Oncall', () => {
                     name: 'aws'
                 }
             },
-            custom: { }
+            custom: { },
+            getProvider(name: string) {
+                return {
+                    getStage() {
+                        return "test"
+                    }
+                }
+            }
         };
         const oncall = new Oncall(
             noCustomField, {}
         );
 
-        return oncall.displayOncall().should.be.rejected;
+        return oncall.info().should.be.rejected;
     });
 });

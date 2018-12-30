@@ -35,6 +35,11 @@ export interface ServerlessInstance {
             }
         }
     };
+    getProvider(name: string): Provider;
+}
+
+export interface Provider {
+    getStage(): string;
 }
 
 export interface ServerlessOptions {

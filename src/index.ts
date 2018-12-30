@@ -1,28 +1,30 @@
 import { EscalationPolicy, Services, PagerDutyClient, Service } from './@types/pagerduty';
-import { CommandDescription, ServerlessInstance, ServerlessOptions } from './@types/serverless';
+import { Provider, CommandDescription, ServerlessInstance, ServerlessOptions } from './@types/serverless';
 import * as PagerDuty from 'node-pagerduty';
 
-export class Oncall {
+export = class Oncall {
 
     readonly serverless: ServerlessInstance;
     readonly options: ServerlessOptions;
     readonly commands: { [key: string]: CommandDescription };
     readonly hooks: { [key: string]: any };
+    readonly provider: Provider;
 
     constructor(serverless: ServerlessInstance, options: ServerlessOptions) {
         this.serverless = serverless;
         this.options = options;
+        this.provider = this.serverless.getProvider(this.serverless.service.provider.name);
         this.commands = {
             oncall: {
                 usage: "Manages service oncall resources and incident management",
                 commands: {
                     sync: {
-                        usage: "Sync's serverless.yml oncall resource information with a remote provider",
-                        lifecycleEvents: ["init", "end"]
+                        usage: "Syncs serverless.yml oncall resource information with a remote provider",
+                        lifecycleEvents: ["sync"]
                     },
                     escalationPolcies: {
                         usage: "List available ecalation policies provided by a remote provider",
-                        lifecycleEvents: ["init", "end"],
+                        lifecycleEvents: ["escalationPolcies"],
                         options: {
                             team: {
                                 usage: 'limit policies to those of a given team',
@@ -34,17 +36,13 @@ export class Oncall {
             }
         };
         this.hooks = {
-            'oncall:sync:init': this.sync.bind(this),
-            'oncall:sync': this.sync.bind(this),
-            //'oncall:sync:end': this.end.bind(this),
-            'oncall:escalationPolcies:init': this.escalationPolicies.bind(this),
-            //'oncall:escalationPolcies': this.escalationPolicies.bind(this),
-            //'oncall:escalationPolcies:end': this.end.bind(this),
-            'before:info:info': this.displayOncall.bind(this)
+            'oncall:sync:sync': this.sync.bind(this),
+            'oncall:escalationPolcies:escalationPolcies': this.escalationPolicies.bind(this),
+            'before:info:info': this.info.bind(this)
         };
     }
 
-    async findOncallSevice(client: PagerDutyClient, serviceName: string): Promise<Service | undefined> {
+    async findSevice(client: PagerDutyClient, serviceName: string): Promise<Service | undefined> {
         const args: { [key: string]: string } = { query: serviceName, 'include[]': 'integrations' };
         // this list should be sufficiently filtered that pagination is not needed
         let res = await client.services.listServices(args);
@@ -52,26 +50,31 @@ export class Oncall {
         return s.services.find(s => s.name === serviceName);
     }
 
-    async createOncallService(client: PagerDutyClient, serviceName: string, escalationPolicy: string): Promise<Service | undefined> {
-        return client.services.createService({
+    async createService(client: PagerDutyClient, serviceName: string, escalationPolicy: string): Promise<Service | undefined> {
+        const payload = {
             service: {
                 type: "service",
                 name: serviceName,
                 description: "Managed by serverless oncall",
-                escalationPolicy: {
+                escalation_policy: {
                     id: escalationPolicy,
                     type: 'escalation_policy_reference'
                 },
                 alert_creation: 'create_alerts_and_incidents'
             }
-        }).then(res => {
+        };
+        return client.services.createService(payload).then(res => {
+            console.log("begin body");
+            console.log(res.body);
             const service: Service = JSON.parse(res.body);
+            console.log("end body");
             return service;
         });
     }
 
     // helper method to create a new custom event transform integration from the pagerduty api
     async createIntegration(client: PagerDutyClient, serviceName: string, serviceId: string): Promise<any> {
+        console.log('creating integration...');
         // https://www.pagerduty.com/blog/new-api-endpoints-increase-platform-extensibility/
         // docs https://v2.developer.pagerduty.com/v2/page/api-reference#!/Services/post_services_id_integrations
         // see https://v2.developer.pagerduty.com/v2/docs/creating-an-integration-inline for code api
@@ -148,8 +151,8 @@ export class Oncall {
     }
 
     async sync() {
-        const serviceName = `test ${this.serverless.service.service}`;
-        this.serverless.cli.log(`syncing oncall for service ${serviceName}...`);
+        const serviceName = `${this.serverless.service.service}-${this.provider.getStage()}`;
+        this.serverless.cli.log(`Syncing oncall for service ${serviceName}...`);
         const custom = this.serverless.service.custom || {};
         const oncall = custom.oncall || {};
         const apiKey = oncall.apiKey;
@@ -159,21 +162,22 @@ export class Oncall {
             );
         }
         const escalationPolicy = oncall.escalationPolicy;
-        if (escalationPolicy === undefined) {
+        if (!escalationPolicy) {
             throw new Error(
                 'The serverless-oncall plugin requires a custom oncall configuration block containing an `oncall.escalationPolicy` identifier'
             );
         }
         const pd: PagerDutyClient = new PagerDuty(apiKey);
-        let pdService = await this.findOncallSevice(pd, serviceName);
+        let pdService = await this.findSevice(pd, serviceName);
         if (pdService === undefined) {
-            this.serverless.cli.log(`creating pager duty service named ${serviceName}`);
-            pdService = await this.createOncallService(pd, serviceName, escalationPolicy);
+            this.serverless.cli.log(`Creating oncall service named ${serviceName}`);
+            pdService = await this.createService(pd, serviceName, escalationPolicy);
             if (pdService !== undefined) {
                 await this.createIntegration(pd, serviceName, pdService.id);
                 //console.log(integration);
             }
         } else {
+            this.serverless.cli.log(`Oncall service exists`);
             if (pdService.integrations.length > 0) {
                 //console.log(pdService.integrations[0]);
                 //console.log(pdService.integrations[0].config);
@@ -184,12 +188,8 @@ export class Oncall {
         }
     }
 
-    end() {
-        this.serverless.cli.log("...end");
-    }
-
-    async displayOncall() {
-        const serviceName = `test ${this.serverless.service.service}`;
+    async info() {
+        const serviceName = `${this.serverless.service.service}-${this.provider.getStage()}`;
         const custom = this.serverless.service.custom || {};
         const oncall = custom.oncall || {};
         const apiKey = oncall.apiKey;
@@ -199,7 +199,7 @@ export class Oncall {
             );
         }
         const pd: PagerDutyClient = new PagerDuty(apiKey);
-        let pdService = await this.findOncallSevice(pd, serviceName);
+        let pdService = await this.findSevice(pd, serviceName);
         if (pdService === undefined) {
             return;
         }
@@ -210,8 +210,4 @@ export class Oncall {
         //this.serverless.cli.consoleLog(pdService);
     }
 
-}
-
-module.exports = {
-    Oncall: Oncall
 };
