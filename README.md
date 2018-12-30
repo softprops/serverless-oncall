@@ -1,4 +1,4 @@
-# serverless-oncall [![Build Status](https://travis-ci.org/softprops/serverless-oncall.svg?branch=master)](https://travis-ci.org/softprops/serverless-oncall)
+# serverless-oncall [![Build Status](https://travis-ci.org/softprops/serverless-oncall.svg?branch=master)](https://travis-ci.org/softprops/serverless-oncall) [![npm](https://img.shields.io/npm/v/serverless-oncall.svg)](https://www.npmjs.com/package/serverless-oncall)
 
 > ⚡📟 easly manage oncall for serverless services
 
