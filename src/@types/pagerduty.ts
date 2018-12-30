@@ -31,6 +31,10 @@ export interface Integration {
     name: string;
     config: any;
     html_url: string;
+    vendor: {
+        summary: string;
+    };
+    integration_key: string;
 }
 
 export interface EscalationPolicy {
@@ -62,3 +66,7 @@ export interface PagerDutyClient {
     };
 }
 
+export interface IntegrationConfig {
+    vendor: string;
+    type: string;
+}
