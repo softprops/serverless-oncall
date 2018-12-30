@@ -70,7 +70,7 @@ export = class Oncall {
 
     // helper method to create a new custom event transform integration from the pagerduty api
     async createIntegration(client: PagerDutyClient, serviceName: string, serviceId: string): Promise<any> {
-        console.log('creating integration...');
+        this.serverless.cli.log('Creating oncall integration...');
         // https://www.pagerduty.com/blog/new-api-endpoints-increase-platform-extensibility/
         // docs https://v2.developer.pagerduty.com/v2/page/api-reference#!/Services/post_services_id_integrations
         // see https://v2.developer.pagerduty.com/v2/docs/creating-an-integration-inline for code api
