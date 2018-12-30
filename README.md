@@ -58,12 +58,14 @@ It is recommended to
 **not** inline your api key's value directly in your `serverless.yaml` in plain text to avoid accidently checking it into source control.
 You can leverage [serverless variables](https://serverless.com/framework/docs/providers/aws/guide/variables/) as you would with other secret credentials to resolve this value without including it in your source code.
 
-The example above is using env variables to resolve these values. You would then invoke a serverless command by providing them
+The example above is using [env variables](https://serverless.com/framework/docs/providers/aws/guide/variables#referencing-environment-variables) to resolve these values. You would then invoke a serverless command by providing them
 externally.
 
 ```bash
 $ PD_ESC_POLICY=xxx PD_API_KEY=xxxxxxx npx serverless info
 ```
+
+Serverless framework provides many options for storing these externally from your source code. Pick one.
 
 ## 🎙️ Commands
 
