@@ -71,6 +71,12 @@ Serverless framework provides [many options](https://serverless.com/framework/do
 
 ## 🎙️ Commands
 
+serverless-oncall adds new commands to your servleress vocabular. You can discover them though the built-in `--help` option
+
+```bash
+$ npx serverless help | grep oncall
+```
+
 ### escalationPolicies
 
 In order to create or update an oncall service you will need to first select an appropriate escalation policy to associate the service with. You can think of roughly as selecting the target group of individuals to be notified. This plugin provides the `escalationPolicies` command for conveniene of listing these but does not manage them directly. Use the pagerduty UI do that instead.
@@ -87,6 +93,9 @@ $ npx serverless oncall escalationPolicies -t {team}
 ```
 
 ### sync
+
+This command will use the information described your serverless.yml oncall resource
+to create resources with a remote provider, currently pagerduty
 
 ```bash
 $ npx serverless oncall sync
