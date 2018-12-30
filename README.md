@@ -2,7 +2,7 @@
 
 > ⚡📟 easly manage oncall for serverless services
 
-## Motivation
+## 🤔 Motivation
 
 Serverless services facilitate fast develop and deploy cycles. Once in production, these applcations should also have an answer for: "Okay, so how is this application supported when customers start using it"? The answer should not be to wait until
 customers tell you your service is down.
@@ -50,7 +50,11 @@ custom:
       - cloudwatch
 ```
 
-This plugin currently requires a pagerduty api key to interact with the pagerduty api. It is recommended to
+This plugin currently requires a pagerduty api key to interact with the pagerduty api.
+
+💡 You can learn how to get your own [here](https://support.pagerduty.com/docs/using-the-api)
+
+It is recommended to
 **not** inline your api key's value directly in your `serverless.yaml` in plain text to avoid accidently checking it into source control.
 You can leverage [serverless variables](https://serverless.com/framework/docs/providers/aws/guide/variables/) as you would with other secret credentials to resolve this value without including it in your source code.
 
