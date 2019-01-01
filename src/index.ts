@@ -100,14 +100,14 @@ export = class Oncall {
         });
     }
 
-    integrationName(serviceName: string, integration: IntegrationConfig): string {
-        return `${serviceName} ${integration.name} Integration`;
+    integrationName(integration: IntegrationConfig): string {
+        return `${integration.name} Integration`;
     }
 
     integrationPayload(serviceName: string, integration: IntegrationConfig): object {
         return {
             integration: {
-                name: this.integrationName(serviceName, integration),
+                name: this.integrationName(integration),
                 type: integration.type,
                 vendor: {
                     id: integration.vendor,
@@ -201,7 +201,7 @@ export = class Oncall {
             const integrationConfig = INTEGRATIONS[name];
             const customConfig = integration[name];
 
-            let existingIntegration = remoteIntegrations.find(i => i.summary === this.integrationName(serviceName, integrationConfig));
+            let existingIntegration = remoteIntegrations.find(i => i.summary === this.integrationName(integrationConfig));
             if (existingIntegration) {
                 if ('transform' === name) {
                     let remoteCode = existingIntegration.config.fields.code.value;

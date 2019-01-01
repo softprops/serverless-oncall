@@ -158,7 +158,7 @@ $ npx serverless oncall escalationPolicies -t {team}
 ### sync
 
 This command will use the information described your serverless.yml oncall resource
-to create resources with a remote provider, currently pagerduty
+to create resources with a remote provider, currently pagerduty.
 
 ```bash
 $ npx serverless oncall sync
