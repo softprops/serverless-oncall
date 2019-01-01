@@ -117,6 +117,18 @@ export = class Oncall {
         };
     }
 
+    patchTransformPayload(serviceName: string, integrationConfig: IntegrationConfig, code: string): object {
+        const patch = this.integrationPayload(serviceName, integrationConfig);
+        patch['integration'].config = {
+            fields: {
+                code: {
+                    value: code
+                }
+            }
+        };
+        return patch;
+    }
+
     // helper method to create am integration from the pagerduty api
     async createIntegration(client: PagerDutyClient, serviceName: string, serviceId: string, integration: IntegrationConfig): Promise<Integration> {
         return (
@@ -207,14 +219,8 @@ export = class Oncall {
                     let remoteCode = existingIntegration.config.fields.code.value;
                     let localCode = (customConfig || {}).code;
                     if (remoteCode !== localCode) {
-                        let patch = this.integrationPayload(serviceName, integrationConfig);
-                        patch['integration'].config = {
-                            fields: {
-                                code: {
-                                    value: customConfig.code
-                                }
-                            }
-                        };
+                        let patch = this.patchTransformPayload(serviceName, integrationConfig, customConfig.code);
+
                         this.serverless.cli.log(`Updating ${name} code...`);
                         let updated = (
                             await pd.services.updateIntegration(
@@ -247,14 +253,7 @@ export = class Oncall {
                 // otherwise this would be provided into the create api call
                 // see https://v2.developer.pagerduty.com/v2/docs/creating-an-integration-inline for code api
                 // see https://gist.github.com/richadams/3f51b617dc4051563fe358d7b0d40fe2 for a code example
-                let patch = this.integrationPayload(serviceName, integrationConfig);
-                patch['integration'].config = {
-                    fields: {
-                        code: {
-                            value: customConfig.code
-                        }
-                    }
-                };
+                let patch = this.patchTransformPayload(serviceName, integrationConfig, customConfig.code);
                 newIntegration = (
                     await pd.services.updateIntegration(
                         service.id, newIntegration.id, patch
