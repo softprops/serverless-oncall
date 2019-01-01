@@ -76,15 +76,15 @@ Serverless framework provides [many options](https://serverless.com/framework/do
 As mentioned above the way you intergrate a monitoring systems is with pagerduty.
 The delivery of this information to your oncall team is key so its worth considering your options
 
-### Cloudwatch
+### cloudwatch
 
-This integration is easy to configure limited in the way information is delivered
+This integration is easy to configure but limited in the way information is delivered.
 
-### Transform
+### transform
 
-This integration requires some configuration but is more flexible with how information is delievered
+This integration requires some configuration but is more flexible with how information is delivered.
 
-Below is a recommended way of keeping that configuration managable.
+Below is an example appoach to keeping that configuration managable.
 
 The `transform` integration lets you provde a snippet of javascript that pager duty will
 run when it recieves an incident event. This lets you desired how you want your information
