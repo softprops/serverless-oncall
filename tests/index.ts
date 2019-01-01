@@ -10,59 +10,61 @@ before(() => {
 
 // https://www.chaijs.com/api/bdd/
 describe('Oncall', () => {
-    it('requires a serverless.custom field', async () => {
-        const noCustomField = {
-            cli: {
-                log(args: any) { },
-                consoleLog(args: any) { }
-            },
-            service: {
-                service: 'foobar',
-                provider: {
-                    name: 'aws'
-                }
-            },
-            getProvider(name: string) {
-                return {
-                    getStage() {
-                        return "test"
+    describe("serverless.yml configuration", () => {
+        it('requires a serverless.custom field', async () => {
+            const noCustomField = {
+                cli: {
+                    log(args: any) { },
+                    consoleLog(args: any) { }
+                },
+                service: {
+                    service: 'foobar',
+                    provider: {
+                        name: 'aws'
+                    }
+                },
+                getProvider(name: string) {
+                    return {
+                        getStage() {
+                            return "test"
+                        }
                     }
                 }
-            }
-        };
-        const oncall = new Oncall(
-            noCustomField, {}
-        );
+            };
+            const oncall = new Oncall(
+                noCustomField, {}
+            );
 
-        return oncall.info().should.be.rejected;
-    });
+            return oncall.info().should.be.rejected;
+        });
 
-    it('requires a serverless.custom.oncall field', async () => {
-        const noCustomField = {
-            cli: {
-                log(args: any) { },
-                consoleLog(args: any) { }
-            },
-            service: {
-                service: 'foobar',
-                provider: {
-                    name: 'aws'
-                }
-            },
-            custom: { },
-            getProvider(name: string) {
-                return {
-                    getStage() {
-                        return "test";
+        it('requires a serverless.custom.oncall field', async () => {
+            const noCustomField = {
+                cli: {
+                    log(args: any) { },
+                    consoleLog(args: any) { }
+                },
+                service: {
+                    service: 'foobar',
+                    provider: {
+                        name: 'aws'
                     }
-                };
-            }
-        };
-        const oncall = new Oncall(
-            noCustomField, {}
-        );
+                },
+                custom: { },
+                getProvider(name: string) {
+                    return {
+                        getStage() {
+                            return "test";
+                        }
+                    };
+                }
+            };
+            const oncall = new Oncall(
+                noCustomField, {}
+            );
 
-        return oncall.info().should.be.rejected;
+            return oncall.info().should.be.rejected;
+        });
     });
 
     describe("patchTransformPayload", () => {
