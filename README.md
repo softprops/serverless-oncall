@@ -51,7 +51,7 @@ custom:
     integrations:
       - cloudwatch:
       - tranform:
-        code: 'code here'
+          code: 'code here'
 ```
 
 This plugin currently requires a pagerduty api key to interact with the pagerduty api.
