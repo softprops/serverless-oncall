@@ -71,7 +71,7 @@ $ PD_ESC_POLICY=xxx PD_API_KEY=xxxxxxx npx serverless info
 
 Serverless framework provides [many options](https://serverless.com/framework/docs/providers/aws/guide/variables/) for storing these externally from your source code. Pick one.
 
-### integrations
+### Integrations
 
 As mentioned above the way you intergrate a monitoring systems is with pagerduty.
 The delivery of this information to your oncall team is key so its worth considering your options
