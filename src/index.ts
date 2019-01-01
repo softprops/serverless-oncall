@@ -181,7 +181,9 @@ export = class Oncall {
     async integrations(service: Service, pd: PagerDutyClient, serviceName: string, integrations: { [key: string]: any}[]) {
         let result: Array<Integration> = [];
         if (service.integrations.length > 0) {
-            // todo: sync with existing
+            for (let currentIntegration of service.integrations) {
+                console.log(currentIntegration);
+            }
         } else {
             for (let integration of integrations) {
                 const name = Object.keys(integration)[0];
@@ -201,6 +203,8 @@ export = class Oncall {
                     continue;
                 }
                 if ('transform' === name) {
+                    // note: event transforms require an separate update api call to set code field
+                    // otherwise this would be provided into the create api call
                     // see https://v2.developer.pagerduty.com/v2/docs/creating-an-integration-inline for code api
                     // see https://gist.github.com/richadams/3f51b617dc4051563fe358d7b0d40fe2 for a code example
                     let patch = this.integrationPayload(serviceName, integrationConfig);
