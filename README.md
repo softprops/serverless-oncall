@@ -41,15 +41,17 @@ custom:
     # visit https://{company}.pagerduty.com/api_keys to create one
     apiKey: ${env:PD_API_KEY,''}
 
-    # a list of integration types to associate with your oncall service
+    # a list of integrations to associate with your oncall service
     # this will determine where monitoring systems send information to.
     #
-    # currently only the "cloudwatch" integration is support but more integrations are
+    # currently only the "cloudwatch" and "transform" integration are supported but more integrations are
     # planned for the future
     # you may omit this configuration if you wish and configure these manually
     # in the pagerduty web console
     integrations:
-      - cloudwatch
+      - cloudwatch:
+      - tranform:
+          code: 'code here'
 ```
 
 This plugin currently requires a pagerduty api key to interact with the pagerduty api.
@@ -68,6 +70,67 @@ $ PD_ESC_POLICY=xxx PD_API_KEY=xxxxxxx npx serverless info
 ```
 
 Serverless framework provides [many options](https://serverless.com/framework/docs/providers/aws/guide/variables/) for storing these externally from your source code. Pick one.
+
+### Integrations
+
+As mentioned above the way you intergrate a monitoring systems is with pagerduty.
+The delivery of this information to your oncall team is key so its worth considering your options
+
+### cloudwatch
+
+This integration is easy to configure but limited in the way information is delivered.
+
+### transform
+
+This integration requires some configuration but is more flexible with how information is delivered.
+
+Below is an example appoach to keeping that configuration managable.
+
+The `transform` integration lets you provde a snippet of javascript that pager duty will
+run when it recieves an incident event. This lets you desired how you want your information
+to be delievered and displayed to your oncall team. The example below leverages serverless frameworks ability externalize and dereference data in separate files.
+
+
+```yaml
+custom:
+  oncall:
+    integrations:
+      # event transform integration (pagerduty's serverless event transformer)
+      - transform:
+          code: "${file(transformConfig.js):code}"
+```
+
+The `transform.code` field is a string of javascript source. This assumes
+`transformConfig.js` is a file that will provide that by loading in
+an `oncallHandler.js` file.
+
+```sh
+$ cat transformConfig.js
+module.exports.code = () => {
+  // read in javascript source
+  return require('fs').readFileSync('oncallHandler.js').toString();
+}
+```
+
+```sh
+$ cat oncallHandler.js
+// https://v2.developer.pagerduty.com/docs/creating-an-integration-inline
+var helloWorld = {
+  event_type: PD.Trigger,
+  incident_key: PD.inputRequest.body.incident_id,
+  description: PD.inputRequest.body.description,
+  details: PD.inputRequest.body,
+  client: "Hello world",
+  client_url: "https://github.com/softprops/serverless-oncall"
+};
+​
+PD.emitGenericEvents([helloWorld]);
+```
+
+This approach also brings the potential of unit testing your transform code as it is now
+just a standalone javascript file. The
+[pagerduty docs](https://v2.developer.pagerduty.com/docs/creating-an-integration-inline)
+may help here.
 
 ## 🎙️ Commands
 
@@ -95,7 +158,7 @@ $ npx serverless oncall escalationPolicies -t {team}
 ### sync
 
 This command will use the information described your serverless.yml oncall resource
-to create resources with a remote provider, currently pagerduty
+to create resources with a remote provider, currently pagerduty.
 
 ```bash
 $ npx serverless oncall sync

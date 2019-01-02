@@ -10,7 +10,11 @@ custom:
     # visit https://{company}.pagerduty.com/api_keys to create one
     apiKey: ${env:PD_API_KEY,''}
     integrations:
-      - cloudwatch
+      # vanilla cloudwatch integration
+      - cloudwatch:
+      # event transform integration (pagerduty's serverless event transformer)
+      - transform:
+          code: "${file(transformConfig.js):code}"
 
 plugins:
  - serverless-oncall
