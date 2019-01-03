@@ -7,7 +7,7 @@
     "license": "MIT",
     "displayName": "serverless-oncall",
     "description": "Easily manage oncall for your serverless services",
-    "version": "0.0.1",
+    "version": "0.1.0",
     "categories": [
         "Other"
     ],
