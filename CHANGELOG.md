@@ -1,3 +1,7 @@
+# 0.1.1
+
+* update to `node-pagerduty@1.1.1` to resolve npm audit issue
+
 # 0.1.0
 
 * add support for [custom event transform integration](https://v2.developer.pagerduty.com/docs/creating-an-integration-inline)
