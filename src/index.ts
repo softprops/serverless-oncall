@@ -60,7 +60,8 @@ export = class Oncall {
                         options: {
                             team: {
                                 usage: 'limit policies to those of a given team',
-                                shortcut: 't'
+                                shortcut: 't',
+                                type: 'string'
                             }
                         }
                     }
